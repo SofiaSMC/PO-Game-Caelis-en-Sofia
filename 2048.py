@@ -144,7 +144,6 @@ def move_tiles(window, tiles, clock, direction):
 
     ceil = True
 
-  #   # ceil = False
   elif direction == "right":
     sort_func = lambda x: x.col
     reverse = True
@@ -181,7 +180,7 @@ def move_tiles(window, tiles, clock, direction):
     )
     ceil = False
 
-
+  # while loop that does the animation
   while updated:
     clock.tick(FPS)
     updated = False
