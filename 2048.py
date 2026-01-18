@@ -144,15 +144,6 @@ def move_tiles(window, tiles, clock, direction):
 
     ceil = True
 
-  # elif direction == "right":
-  #   # sort_func = lambda x: x.col # merge in the correct order (in opposite to the movement). lambda is a one-call function
-  #   # reverse = True # asc sorting
-  #   # delta = (MOVE_VEL, 0)
-  #   # boundary_check = lambda tile: tile.col == COLS - 1 # becomes COLS - 1
-  #   # get_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col + 1}") # plus 1
-  #   # merge_check = lambda tile, next_tile: tile.x < next_tile.x - MOVE_VEL # lesser than sign
-  #   # lambda tile, next_tile: tile.x + RECT_WIDTH + MOVE_VEL < next_tile.x # other order bc right
-
   #   # ceil = False
   elif direction == "right":
     sort_func = lambda x: x.col
