@@ -1,62 +1,84 @@
-# PIG: Multi-player game
-
-# define rolling the dice
-'''def: define, used to make recurring statements that can be used throughout the code'''
 import random
+import tkinter as tk
+from tkinter import messagebox
 
+# ----- Game logic -----
 def roll():
-   min_value = 1
-   max_value = 6
-   roll = random.randint(min_value, max_value)
-   
-   return roll
+    return random.randint(1, 6)
 
-# amount of players
-while True:
-   players = input("enter the amout of players (2-4): ")
-   if players.isdigit():
-      players = int(players)
-      if 2 <= players <= 4:
-         break
-      else:
-         print("must be between 2 and 4 players")
-   else:
-      print("Invalid, try again.")
+class PigGame:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("PIG: Multi-player Game")
+        
+        self.players = 0
+        self.player_scores = []
+        self.current_score = 0
+        self.current_player = 0
+        self.max_score = 150
+        
+        self.setup_players_screen()
+        
+    def setup_players_screen(self):
+        # Clear window
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        tk.Label(self.root, text="Enter number of players (2-4):").pack(pady=10)
+        self.player_entry = tk.Entry(self.root)
+        self.player_entry.pack(pady=5)
+        tk.Button(self.root, text="Start Game", command=self.start_game).pack(pady=10)
+    
+    def start_game(self):
+        try:
+            players = int(self.player_entry.get())
+            if players < 2 or players > 4:
+                raise ValueError
+            self.players = players
+            self.player_scores = [0 for _ in range(players)]
+            self.current_player = 0
+            self.current_score = 0
+            self.game_screen()
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a number between 2 and 4.")
+    
+    def game_screen(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        tk.Label(self.root, text=f"Player {self.current_player + 1}'s turn").pack(pady=5)
+        tk.Label(self.root, text=f"Total score: {self.player_scores[self.current_player]}").pack(pady=5)
+        self.turn_score_label = tk.Label(self.root, text=f"Current turn score: {self.current_score}")
+        self.turn_score_label.pack(pady=5)
+        
+        tk.Button(self.root, text="Roll", command=self.roll_dice).pack(pady=5)
+        tk.Button(self.root, text="Hold", command=self.hold).pack(pady=5)
+    
+    def roll_dice(self):
+        value = roll()
+        if value == 1:
+            messagebox.showinfo("Rolled 1", "You rolled a 1! Turn over, no points added.")
+            self.current_score = 0
+            self.next_player()
+        else:
+            self.current_score += value
+            self.turn_score_label.config(text=f"Current turn score: {self.current_score}")
+            messagebox.showinfo("Rolled Dice", f"You rolled a {value}!")
+    
+    def hold(self):
+        self.player_scores[self.current_player] += self.current_score
+        if self.player_scores[self.current_player] >= self.max_score:
+            messagebox.showinfo("Game Over", f"Player {self.current_player + 1} wins with {self.player_scores[self.current_player]} points!")
+            self.root.destroy()
+        else:
+            self.current_score = 0
+            self.next_player()
+    
+    def next_player(self):
+        self.current_player = (self.current_player + 1) % self.players
+        self.game_screen()
 
-# look if there is a winner
-max_score = 150
-player_scores = [0 for _ in range(players)] #list comprehension. puts a 0 in the list for all players (= start score). '_' is the variable.
-
-# rolling function
-while max(player_scores) < max_score:
-
-   for player_index in range(players):
-      print("\nplayer", player_index + 1,  "turn has just started.\n" )
-
-      print(f"your total score = {player_scores[player_index]} \n")
-      current_score = 0
-
-      #simulate the turn
-      while True:
-         should_roll = input("Do you want to roll (y)?: ")
-         if should_roll.lower() != "y":
-            break
-
-         value = roll()
-         if value == 1:
-            print("You rolled a 1! Your turn is over.")
-            current_score = 0
-            break #quite important to add, do not forget to break the loop, otherwise the turn won't end with rolling a 1!
-         else: 
-            current_score += value
-            print(f"you rolled a {value}!")
-         
-         print(f"Your score is: {current_score} ")
-
-      player_scores[player_index] += current_score
-      print(f"Your total score is: {player_scores[player_index]}")
-
-max_score = max(player_scores)
-winner_index = player_scores.index(max_score)
-
-print(f"player {winner_index + 1} is the winner with a score of: {max_score}")
+# ----- Run the game -----
+root = tk.Tk()
+game = PigGame(root)
+root.mainloop()
