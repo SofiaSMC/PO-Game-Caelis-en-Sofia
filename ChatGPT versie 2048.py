@@ -51,7 +51,7 @@ def move(turns): #turns = hoeveel keer draaien
     return moved
 
 def key(key):
-    keys = {"a":0, "w":1, "d":2, "s":3} #koppelt de toetsen aan richtingen
+    keys = {"a":0, "w":3, "d":2, "s":1} #koppelt de toetsen aan richtingen
     if key in keys and move(keys[key]):
         add_tile() #nieuwe 2
         draw() #tekend het bord opnieuw
