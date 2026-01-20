@@ -20,7 +20,7 @@ def run_game(script_name):
 # Create main menu window
 root = tk.Tk()
 root.title("Game Launcher")
-root.geometry("400x300")
+root.geometry("800x800")
 
 tk.Label(root, text="Select a Game", font=("Arial", 18)).pack(pady=20)
 
