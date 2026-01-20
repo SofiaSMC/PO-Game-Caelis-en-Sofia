@@ -1,5 +1,7 @@
 from appJar import gui
-import vragenGameMakenPo
+import subprocess
+import sys
+import os
 
 # Functie voor de knoppen
 def on_button_press(button):
@@ -7,8 +9,9 @@ def on_button_press(button):
         app.stop()
     
     elif button == "start":
-        app.stop() #homescreen sluit
-        vragenGameMakenPo.start_vragenGameMakenPo()
+        app.stop()  # homescreen sluiten
+        script_path = os.path.join(os.path.dirname(__file__), "vragenGameMakenPo.py")
+        subprocess.Popen([sys.executable, script_path])
         
     # info box met uitleg, ik heb voor de info box en de edit box ChatGpt geraadpleegd.
     elif button == "instructies":
