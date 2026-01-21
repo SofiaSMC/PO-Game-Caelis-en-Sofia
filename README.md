@@ -1,1 +1,20 @@
 # Game_Maken
+
+Vragen:
+Ik denk dat ik dit systeem regelmatig zou willen gebruiken. (P)
+Ik vond het systeem onnodig complex. (N)
+Ik vond dat de games gemakkelijk te vinden en selecteren waren. (P)
+Ik vond de game-play onbegrijpelijk. (N)
+Ik vind de games leuk en intuïtief te spelen. (P)
+Ik vind dat ik hulp nodig zou hebben van een technisch persoon om dit systeem te gebruiken. (N)
+Ik vond de handleiding handig en makkelijk te begrijpen. (P)
+Ik vond dat er teveel inconsistenties (bugs, errors, foutjes) in dit systeem waren. (N)
+Ik kan me voorstellen dat de meeste mensen snel zullen leren hoe ze dit systeem gebruiken. (P)
+Ik vond het systeem lastig te gebruiken. (N)
+Ik voelde me zeer zelfverzekerd bij het gebruik van dit systeem. (P)
+Ik moest veel leren voordat ik met dit systeem aan de slag kon gaan. (N)
+Ik zou Gameplayz nog een keer spelen (P)
+Ik vond dat er onvoldoende spelletjes op het platform zaten. (N)
+Welke games zou jij nog graag willen zien? (Open vraag)
+Welke verbeteringen zou jij nog willen meegeven? (Open vraag)
+Op een schaal van 1 tot 10, hoe groot is de kans dat je GamePlayz zou aanraden aan een vriend/familielid/ander? (NPS)
