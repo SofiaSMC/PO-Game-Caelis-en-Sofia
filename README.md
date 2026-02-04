@@ -1,5 +1,5 @@
 # Game_Maken
-Klik op de groene <code> knop en download de ZIP.
+Klik op de groene knop boven aan de repo en download de ZIP.
 
 Start het spel op door eerst de juiste versie van python te downloaden: python 13, dit kan bijvoorbeeld met Thonny of VS-code. Indien je VS-code gebruikt, vergeet dan niet python op VS-code te installeren. Installeer ook vanaf je terminal pygame en tkinter. Als je pip hebt op je laptop, gebruik dan
 pip3 install pygame
