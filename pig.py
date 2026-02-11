@@ -2,6 +2,9 @@ import random
 import tkinter as tk
 from tkinter import messagebox
 
+BIG_FONT = ("Arial", 20)
+BUTTON_FONT = ("Arial", 16)
+
 # ----- Game logic -----
 def roll():
     return random.randint(1, 6)
@@ -10,6 +13,8 @@ class PigGame:
     def __init__(self, root):
         self.root = root
         self.root.title("PIG: Multi-player Game")
+        self.root.geometry("550x400")
+        self.root.tk.call('tk', 'scaling', 1.5)
         
         self.players = 0
         self.player_scores = []

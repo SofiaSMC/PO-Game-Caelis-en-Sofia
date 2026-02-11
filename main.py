@@ -29,6 +29,7 @@ tk.Button(root, text="2048", width=20, height=2, command=lambda: run_game("2048.
 tk.Button(root, text="Pig Game", width=20, height=2, command=lambda: run_game("pig.py")).pack(pady=10)
 tk.Button(root, text="Quiz Game", width=20, height=2, command=lambda: run_game("homescreenGameMakenPo.py")).pack(pady=10)
 tk.Button(root,text="Film",width=20,height=2,command=lambda: webbrowser.open("https://youtu.be/gAEEYzls4Es")).pack(pady=10)
+tk.Button(root,text="Vragenlijst",width=20,height=2,command=lambda: webbrowser.open("https://docs.google.com/forms/d/1a7guH7DwZbsJyNidwHJXVutPvzlK7xQ41_AsRbFWRrY/edit")).pack(pady=10)
 tk.Button(root, text="Quit", width=20, height=2, command=root.quit).pack(pady=10)
 
 root.mainloop()

@@ -21,7 +21,7 @@ def run_game(script_name):
 # Create main menu window
 root = tk.Tk()
 root.title("Game Launcher")
-root.geometry("400x300")
+root.geometry("800x800")
 
 tk.Label(root, text="Select a Game", font=("Arial", 18)).pack(pady=20)
 
@@ -29,6 +29,7 @@ tk.Button(root, text="2048", width=20, height=2, command=lambda: run_game("ChatG
 tk.Button(root, text="Pig Game", width=20, height=2, command=lambda: run_game("pig.py")).pack(pady=10)
 tk.Button(root, text="Quiz Game", width=20, height=2, command=lambda: run_game("homescreenGameMakenPo.py")).pack(pady=10)
 tk.Button(root,text="Film",width=20,height=2,command=lambda: webbrowser.open("https://youtu.be/gAEEYzls4Es")).pack(pady=10)
+tk.Button(root,text="Vragenlijst",width=20,height=2,command=lambda: webbrowser.open("https://docs.google.com/forms/d/1KKGiSp4C3-Jc-u2G_GoQbTnWghS2Emhq3mugDO5Lb6c/edit")).pack(pady=10)
 tk.Button(root, text="Quit", width=20, height=2, command=root.quit).pack(pady=10)
 
 root.mainloop()
