@@ -1,9 +1,9 @@
 import pygame
 import random
 import math
+import copy
 
 pygame.init()
-
 # constants
 FPS = 60
 
@@ -24,6 +24,52 @@ MOVE_VEL = 20 # velocity
 
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2048")
+
+# game-over:
+import sys
+
+def game_over_popup(window, clock):
+    font = pygame.font.SysFont("comicsans", 72, bold=True)
+    button_font = pygame.font.SysFont("comicsans", 48, bold=True)
+
+    overlay = pygame.Surface((WIDTH, HEIGHT))
+    overlay.set_alpha(200)
+    overlay.fill((0, 0, 0))
+
+    restart_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2, 300, 70)
+    quit_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 + 100, 300, 70)
+
+    while True:
+        clock.tick(FPS)
+        window.blit(overlay, (0, 0))
+
+        # "Game Over" tekst
+        text = font.render("Game Over", True, (255, 255, 255))
+        window.blit(text, (WIDTH//2 - text.get_width()//2, HEIGHT//2 - 150))
+
+        # Knoppen
+        pygame.draw.rect(window, (0, 200, 0), restart_rect)
+        pygame.draw.rect(window, (200, 0, 0), quit_rect)
+
+        restart_text = button_font.render("Restart", True, (255, 255, 255))
+        quit_text = button_font.render("Quit", True, (255, 255, 255))
+
+        window.blit(restart_text, restart_text.get_rect(center=restart_rect.center))
+        window.blit(quit_text, quit_text.get_rect(center=quit_rect.center))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if restart_rect.collidepoint(event.pos):
+                    return "restart"
+                if quit_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    sys.exit()
 
 # set up:
 class Tile: # define tiles as a class
@@ -125,100 +171,104 @@ def generate_tiles(): # generate new tiles
   
   return tiles
 
+# logic based on logged tiles positons first:
+def can_move(grid):
+    size = len(grid)
+    for y in range(size):
+        for x in range(size):
+            if grid[y][x] == 0:
+                return True
+            if x < size - 1 and grid[y][x] == grid[y][x + 1]:
+                return True
+            if y < size - 1 and grid[y][x] == grid[y + 1][x]:
+                return True
+    return False
+
+def move_grid(grid, direction):
+    size = len(grid)
+    moved = False
+    new_grid = copy.deepcopy(grid)
+
+    def process_line(line):
+        nonlocal moved
+        merged_line = [0] * size
+        skip = False
+        insert_pos = 0
+        for i in range(size):
+            if line[i] == 0:
+                continue
+            if not skip and insert_pos > 0 and merged_line[insert_pos - 1] == line[i]:
+                merged_line[insert_pos - 1] *= 2
+                skip = True
+                moved = True
+            else:
+                merged_line[insert_pos] = line[i]
+                if i != insert_pos:
+                    moved = True
+                insert_pos += 1
+                skip = False
+        return merged_line
+
+    if direction in ['left', 'right']:
+        for y in range(size):
+            line = new_grid[y][:]
+            if direction == 'right':
+                line.reverse()
+            merged = process_line(line)
+            if direction == 'right':
+                merged.reverse()
+            new_grid[y] = merged
+    elif direction in ['up', 'down']:
+        for x in range(size):
+            line = [new_grid[y][x] for y in range(size)]
+            if direction == 'down':
+                line.reverse()
+            merged = process_line(line)
+            if direction == 'down':
+                merged.reverse()
+            for y in range(size):
+                new_grid[y][x] = merged[y]
+
+    return new_grid, moved
 
 # animate & merge tiles:
 def move_tiles(window, tiles, clock, direction):
-  updated = True
-  blocks = set() # so you don't re-merge the same tiles per one move
-  
-  if direction == "left":
-    sort_func = lambda x: x.col # merge in the correct order (in opposite to the movement). lambda is a one-call function
-    reverse = False # asc or desc order sorting
-    delta = (-MOVE_VEL, 0) # will move you to the left
-    boundary_check = lambda tile: tile.col == 0 # have you hit the boundary? (end of the screen)
-    get_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col - 1}") # if no other tile: returns None
-    merge_check = lambda tile, next_tile: tile.x > next_tile.x + MOVE_VEL # should I merge based on the curr. movement of the tile
-    move_check = (
-      lambda tile, next_tile: tile.x > next_tile.x +RECT_WIDTH + MOVE_VEL # when you shouldn't merge
-    )
+    # 1. Convert current tiles dict to a 2D list of values
+    grid = [[0 for _ in range(COLS)] for _ in range(ROWS)]
+    for tile in tiles.values():
+        grid[tile.row][tile.col] = tile.value
 
-    ceil = True
+    # 2. Move/merge using the logic function
+    new_grid, moved = move_grid(grid, direction)
 
-  #   # ceil = False
-  elif direction == "right":
-    sort_func = lambda x: x.col
-    reverse = True
-    delta = (MOVE_VEL, 0)
-    boundary_check = lambda tile: tile.col == COLS - 1
-    get_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col + 1}")
-    merge_check = lambda tile, next_tile: tile.x < next_tile.x - MOVE_VEL
-    move_check = (
-        lambda tile, next_tile: tile.x + RECT_WIDTH + MOVE_VEL < next_tile.x
-    )
-    ceil = False
+    # 3. If nothing moved, check game over
+    if not moved:
+        if not can_move(grid):
+            choice = game_over_popup(window, clock)
+            if choice == "restart":
+                return "restart"
+            return
 
-  elif direction == "up":
-    sort_func = lambda x: x.row
-    reverse = False
-    delta = (0, -MOVE_VEL)
-    boundary_check = lambda tile: tile.row == 0
-    get_next_tile = lambda tile: tiles.get(f"{tile.row - 1}{tile.col}")
-    merge_check = lambda tile, next_tile: tile.y > next_tile.y + MOVE_VEL
-    move_check = (
-        lambda tile, next_tile: tile.y > next_tile.y + RECT_HEIGHT + MOVE_VEL
-    )
-    ceil = True
-  
-  elif direction == "down":
-    sort_func = lambda x: x.row
-    reverse = True
-    delta = (0, MOVE_VEL)
-    boundary_check = lambda tile: tile.row == ROWS - 1
-    get_next_tile = lambda tile: tiles.get(f"{tile.row + 1}{tile.col}")
-    merge_check = lambda tile, next_tile: tile.y < next_tile.y - MOVE_VEL
-    move_check = (
-        lambda tile, next_tile: tile.y + RECT_HEIGHT + MOVE_VEL < next_tile.y
-    )
-    ceil = False
+    # 4. Update tiles based on new_grid
+    new_tiles = {}
+    for r in range(ROWS):
+        for c in range(COLS):
+            if new_grid[r][c] != 0:
+                new_tiles[f"{r}{c}"] = Tile(new_grid[r][c], r, c)
 
+    # 5. Add one new tile in random empty spot
+    empty_positions = [(r, c) for r in range(ROWS) for c in range(COLS) if f"{r}{c}" not in new_tiles]
+    if empty_positions:
+        r, c = random.choice(empty_positions)
+        new_tiles[f"{r}{c}"] = Tile(random.choice([2, 4]), r, c)
 
-  while updated:
-    clock.tick(FPS)
-    updated = False
-    sorted_tiles = sorted(tiles.values(), key=sort_func, reverse=reverse)
+    # 6. Replace old tiles with new tiles
+    tiles.clear()
+    tiles.update(new_tiles)
 
-    for i, tile in enumerate(sorted_tiles):
-      if boundary_check(tile):
-        continue
+    # 7. Redraw the window
+    draw(window, tiles)
 
-      next_tile = get_next_tile(tile)
-      if not next_tile:
-        tile.move(delta)
-    
-      elif (
-        tile.value == next_tile.value
-        and tile not in blocks
-        and next_tile not in blocks
-      ):
-        if merge_check(tile, next_tile):
-          tile.move(delta)
-        else:
-          next_tile.value *= 2
-          sorted_tiles.pop(i)
-          blocks.add(next_tile)
-      
-      elif move_check(tile, next_tile):
-        tile.move(delta)
-    
-      else:
-        continue
-
-      tile.set_pos(ceil)
-      updated = True
-
-    update_tiles(window, tiles, sorted_tiles)
-
-  return end_move(tiles)
 
 def end_move(tiles):
   if len(tiles) == 16:
@@ -238,38 +288,35 @@ def update_tiles(window, tiles, sorted_tiles):
   draw(window, tiles)
 
 # main loop (event loop):
+# main loop (event loop):
 def main(window):
-  clock = pygame.time.Clock()
-  run = True
+    while True:  # outer loop voor restart
+        clock = pygame.time.Clock()
+        run = True
+        tiles = generate_tiles()
 
-  tiles = generate_tiles()  # example: "00": Tile(2, 0, 0), "20": Tile(2, 2, 0)
-  while run:
-    clock.tick(FPS) # so that it runs once every 60s. otherwise different laptops = different speed
+        while run:
+            clock.tick(FPS)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    result = None
+                    if event.key in (pygame.K_LEFT, pygame.K_a):
+                        result = move_tiles(window, tiles, clock, "left")
+                    elif event.key in (pygame.K_RIGHT, pygame.K_d):
+                        result = move_tiles(window, tiles, clock, "right")
+                    elif event.key in (pygame.K_UP, pygame.K_w):
+                        result = move_tiles(window, tiles, clock, "up")
+                    elif event.key in (pygame.K_DOWN, pygame.K_s):
+                        result = move_tiles(window, tiles, clock, "down")
 
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        run = False
-        break
+                    if result == "restart":
+                        run = False  # stop inner loop om te herstarten
+                        break
 
-      # check for keypresses:
-      if event.type == pygame.KEYDOWN:
-        if event.key in (pygame.K_LEFT, pygame.K_a):
-          move_tiles(window, tiles, clock, "left")
-
-        elif event.key in (pygame.K_RIGHT, pygame.K_d):
-          move_tiles(window, tiles, clock, "right")
-
-        elif event.key in (pygame.K_UP, pygame.K_w):
-          move_tiles(window, tiles, clock, "up")
-
-        elif event.key in (pygame.K_DOWN, pygame.K_s):
-          move_tiles(window, tiles, clock, "down")
-      
-      
-    
-    draw(window, tiles)
-  
-  pygame.quit()
+            draw(window, tiles)
 
 if __name__ == "__main__":
   main(WINDOW) #run the loop on the window
