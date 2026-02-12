@@ -4,7 +4,6 @@ import math
 import copy
 
 pygame.init()
-
 # constants
 FPS = 60
 
