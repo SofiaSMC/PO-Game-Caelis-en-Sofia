@@ -26,6 +26,52 @@ MOVE_VEL = 20 # velocity
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2048")
 
+# game-over:
+import sys
+
+def game_over_popup(window, clock):
+    font = pygame.font.SysFont("comicsans", 72, bold=True)
+    button_font = pygame.font.SysFont("comicsans", 48, bold=True)
+
+    overlay = pygame.Surface((WIDTH, HEIGHT))
+    overlay.set_alpha(200)
+    overlay.fill((0, 0, 0))
+
+    restart_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2, 300, 70)
+    quit_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 + 100, 300, 70)
+
+    while True:
+        clock.tick(FPS)
+        window.blit(overlay, (0, 0))
+
+        # "Game Over" tekst
+        text = font.render("Game Over", True, (255, 255, 255))
+        window.blit(text, (WIDTH//2 - text.get_width()//2, HEIGHT//2 - 150))
+
+        # Knoppen
+        pygame.draw.rect(window, (0, 200, 0), restart_rect)
+        pygame.draw.rect(window, (200, 0, 0), quit_rect)
+
+        restart_text = button_font.render("Restart", True, (255, 255, 255))
+        quit_text = button_font.render("Quit", True, (255, 255, 255))
+
+        window.blit(restart_text, restart_text.get_rect(center=restart_rect.center))
+        window.blit(quit_text, quit_text.get_rect(center=quit_rect.center))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if restart_rect.collidepoint(event.pos):
+                    return "restart"
+                if quit_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    sys.exit()
+
 # set up:
 class Tile: # define tiles as a class
   COLORS = [ # original 2048 tile colors
@@ -199,10 +245,10 @@ def move_tiles(window, tiles, clock, direction):
     # 3. If nothing moved, check game over
     if not moved:
         if not can_move(grid):
-            # Game over popup
-            print("No viable moves. Game over!")
-
-        return
+            choice = game_over_popup(window, clock)
+            if choice == "restart":
+                return "restart"
+            return
 
     # 4. Update tiles based on new_grid
     new_tiles = {}
@@ -243,38 +289,35 @@ def update_tiles(window, tiles, sorted_tiles):
   draw(window, tiles)
 
 # main loop (event loop):
+# main loop (event loop):
 def main(window):
-  clock = pygame.time.Clock()
-  run = True
+    while True:  # outer loop voor restart
+        clock = pygame.time.Clock()
+        run = True
+        tiles = generate_tiles()
 
-  tiles = generate_tiles()  # example: "00": Tile(2, 0, 0), "20": Tile(2, 2, 0)
-  while run:
-    clock.tick(FPS) # so that it runs once every 60s. otherwise different laptops = different speed
+        while run:
+            clock.tick(FPS)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    result = None
+                    if event.key in (pygame.K_LEFT, pygame.K_a):
+                        result = move_tiles(window, tiles, clock, "left")
+                    elif event.key in (pygame.K_RIGHT, pygame.K_d):
+                        result = move_tiles(window, tiles, clock, "right")
+                    elif event.key in (pygame.K_UP, pygame.K_w):
+                        result = move_tiles(window, tiles, clock, "up")
+                    elif event.key in (pygame.K_DOWN, pygame.K_s):
+                        result = move_tiles(window, tiles, clock, "down")
 
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        run = False
-        break
+                    if result == "restart":
+                        run = False  # stop inner loop om te herstarten
+                        break
 
-      # check for keypresses:
-      if event.type == pygame.KEYDOWN:
-        if event.key in (pygame.K_LEFT, pygame.K_a):
-          move_tiles(window, tiles, clock, "left")
-
-        elif event.key in (pygame.K_RIGHT, pygame.K_d):
-          move_tiles(window, tiles, clock, "right")
-
-        elif event.key in (pygame.K_UP, pygame.K_w):
-          move_tiles(window, tiles, clock, "up")
-
-        elif event.key in (pygame.K_DOWN, pygame.K_s):
-          move_tiles(window, tiles, clock, "down")
-      
-      
-    
-    draw(window, tiles)
-  
-  pygame.quit()
+            draw(window, tiles)
 
 if __name__ == "__main__":
   main(WINDOW) #run the loop on the window
