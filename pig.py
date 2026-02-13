@@ -10,6 +10,9 @@ def roll():
     return random.randint(1, 6)
 
 class PigGame:
+    def show_instructions(self):
+        messagebox.showinfo("Instructies","Voer eerst in met hoeveel spelers je speelt (2 tot 4). Klik vervolgens op de knop om het spel te starten. Speler 1 zal beginnen. Als je aan de beurt bent kun je twee dingen kiezen: roll of hold. Hold betekent dat je beurt klaar is en je punten worden opgeslagen, deze kun je nu niet meer verliezen. Roll betekent dat je een digitale (ontzichbare) dobbelsteel rolt. Je punten zijn de ogen van de dobbelsteen. Je mag zo vaak rollen als je wilt, en alle punten worden opgeteld. Maar let op! Zodra je een 1 gooit, gaan je punten die je niet hebt opgeslagen, verloren. Je beurt is ook voorbij en speler 2 is aan zet! Als alle spelers hun beurt hebben gehad, noem je dat een ronde. Zodra een speler meer dan 150 punten in totaal heeft gehaald en deze heeft opgeslagen met Hold, mogen de andere spelers hun ronde afmaken. De speler met de meeste punten heeft dan gewonnen!")
+    
     def __init__(self, root):
         self.root = root
         self.root.title("PIG: Multi-player Game")
@@ -33,6 +36,7 @@ class PigGame:
         self.player_entry = tk.Entry(self.root)
         self.player_entry.pack(pady=5)
         tk.Button(self.root, text="Start Game", command=self.start_game).pack(pady=10)
+        tk.Button(self.root, text="Instructions", command=self.show_instructions).pack(pady=5)
     
     def start_game(self):
         try:
@@ -58,6 +62,7 @@ class PigGame:
         
         tk.Button(self.root, text="Roll", command=self.roll_dice).pack(pady=5)
         tk.Button(self.root, text="Hold", command=self.hold).pack(pady=5)
+        tk.Button(self.root, text="Instructions", command=self.show_instructions).pack(pady=(150, 0))
     
     def roll_dice(self):
         value = roll()
