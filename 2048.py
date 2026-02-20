@@ -287,7 +287,7 @@ def update_tiles(window, tiles, sorted_tiles):
   
   draw(window, tiles)
 
-# main loop (event loop):
+
 # main loop (event loop):
 def main(window):
     while True:  # outer loop voor restart
